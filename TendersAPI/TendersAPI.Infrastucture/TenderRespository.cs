@@ -25,7 +25,7 @@ namespace TendersAPI.Infrastucture
             throw new NotImplementedException();
         }
 
-        public async Task<Result<PaginatedResult<TendersApi.Domain.Tender>>> GetTendersAsync(int page, int pageSize)
+        public async Task<Result<PaginatedResult<TendersApi.Domain.Tender>>> GetTendersAsync(int page)
         {
 
             var response = await _client.GetAsync(_client.BaseAddress + $"?page={page}");

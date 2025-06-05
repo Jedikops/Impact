@@ -21,9 +21,9 @@ namespace TendersAPI.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 100)
+        public async Task<IActionResult> Get([FromQuery] int page = 1)
         {
-            var result = await _getTendersHandler.Handle(new GetTendersQuery { Page = page, PageSize = pageSize });
+            var result = await _getTendersHandler.Handle(new GetTendersQuery { Page = page});
 
             if (result.IsSuccess)
                 return Ok(result);

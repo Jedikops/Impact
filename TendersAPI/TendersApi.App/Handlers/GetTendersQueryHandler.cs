@@ -16,11 +16,11 @@ namespace TendersApi.App.Handlers
 
         public async Task<Result<PaginatedResult<Tender>>> Handle(GetTendersQuery query)
         {
-            if (query.Page * query.PageSize > 100000) {
+            if (query.Page > 100) {
                 return Result<PaginatedResult<Tender>>.Failure(ResultStatus.ValidationError, "Out of bounds");
             }
 
-            return await _repository.GetTendersAsync(query.Page, query.PageSize);
+            return await _repository.GetTendersAsync(query.Page);
         }
     }
 }

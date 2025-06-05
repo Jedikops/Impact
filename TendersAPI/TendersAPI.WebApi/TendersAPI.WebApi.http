@@ -4,3 +4,8 @@ GET {{TendersAPI.Service_HostAddress}}/api/tenders/
 Accept: application/json
 
 ###
+
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?page=200
+Accept: application/json
+
+###
