@@ -1,0 +1,27 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using TendersApi.App.Interfaces;
+using TendersApi.App.Queries;
+using TendersApi.Domain;
+
+namespace TendersApi.App.Handlers
+{
+    public class GetTenderByIdQueryHandler
+    {
+        private readonly ITenderRepository _repository;
+
+        public GetTenderByIdQueryHandler(ITenderRepository repository)
+        {
+            _repository = repository;
+        }
+
+        public async Task<Tender?> Handle(GetTenderByIdQuery query)
+        {
+            return await _repository.GetTenderByIdAsync(query.Id);
+
+        }
+    }
+}
