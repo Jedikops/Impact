@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TendersApi.App\TendersApi.App.csproj" />
-    <ProjectReference Include="..\TendersAPI.Infrastucture\TendersAPI.Infrastucture.csproj" />
+    <ProjectReference Include="..\TendersAPI.Infrastructure\TendersAPI.Infrastructure.csproj" />
     <ProjectReference Include="..\TendersAPI.ServiceDefaults\TendersAPI.ServiceDefaults.csproj" />
   </ItemGroup>
 

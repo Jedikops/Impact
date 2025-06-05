@@ -3,7 +3,10 @@
 GET {{TendersAPI.Service_HostAddress}}/api/tenders/
 Accept: application/json
 
+###
 
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?before=2021-06-06T00:00:00
+Accept: application/json
 
 ###
 

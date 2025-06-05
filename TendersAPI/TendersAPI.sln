@@ -12,7 +12,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TendersApi.Domain", "Tender
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TendersApi.App", "TendersApi.App\TendersApi.App.csproj", "{E93C4550-33B4-4E5B-BFF9-452B4551316A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TendersAPI.Infrastucture", "TendersAPI.Infrastucture\TendersAPI.Infrastucture.csproj", "{A47554A2-1A70-4067-A164-DC8AFBD50706}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TendersAPI.Infrastructure", "TendersAPI.Infrastructure\TendersAPI.Infrastructure.csproj", "{A47554A2-1A70-4067-A164-DC8AFBD50706}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspire", "Aspire", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject

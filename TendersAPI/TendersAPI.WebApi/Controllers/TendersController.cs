@@ -21,9 +21,9 @@ namespace TendersApi.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] int page = 1)
+        public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] DateTime? before = null, [FromQuery] DateTime? after = null)
         {
-            var result = await _getTendersHandler.Handle(new GetTendersQuery { Page = page });
+            var result = await _getTendersHandler.Handle(new GetTendersQuery { Page = page, Before = before ?? DateTime.Now, After = after });
 
             if (result.IsSuccess)
                 return Ok(result);
