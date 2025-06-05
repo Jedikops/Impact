@@ -1,4 +1,4 @@
-using TendersAPI.WebApi;
+using TendersApi.WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 

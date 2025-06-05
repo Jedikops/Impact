@@ -3,9 +3,9 @@ using System.Text.Json;
 using TendersApi.App.Common;
 using TendersApi.App.Interfaces;
 using TendersApi.Infrastructure.Models;
-using TendersAPI.Infrastucture.Mapping;
+using TendersApi.Infrastucture.Mapping;
 
-namespace TendersAPI.Infrastucture
+namespace TendersApi.Infrastucture.Repositories
 {
     public class TenderRespository : ITenderRepository
     {
@@ -25,8 +25,12 @@ namespace TendersAPI.Infrastucture
             throw new NotImplementedException();
         }
 
-        public async Task<Result<PaginatedResult<TendersApi.Domain.Tender>>> GetTendersAsync(int page)
+        public async Task<Result<PaginatedResult<Domain.Tender>>> GetTendersAsync(int page)
         {
+            if (page > 100)
+            {
+                return Result<PaginatedResult<Domain.Tender>>.Failure(ResultStatus.ValidationError, "Out of bounds");
+            }
 
             var response = await _client.GetAsync(_client.BaseAddress + $"?page={page}");
 
@@ -38,8 +42,8 @@ namespace TendersAPI.Infrastucture
             {
                 return ex.StatusCode switch
                 {
-                    System.Net.HttpStatusCode.BadRequest => Result<PaginatedResult<TendersApi.Domain.Tender>>.Failure(ResultStatus.InternalError, "External Api bad request"),
-                    _ => Result<PaginatedResult<TendersApi.Domain.Tender>>.Failure(ResultStatus.ExternalApiError, "External Api bad request"),
+                    System.Net.HttpStatusCode.BadRequest => Result<PaginatedResult<Domain.Tender>>.Failure(ResultStatus.InternalError, "External Api bad request"),
+                    _ => Result<PaginatedResult<Domain.Tender>>.Failure(ResultStatus.ExternalApiError, "External Api bad request"),
                 };
             }
 
@@ -49,8 +53,8 @@ namespace TendersAPI.Infrastucture
 
             var tenders = result.Results.Select(x => _mapper.MapToDomain(x));
 
-            return Result<PaginatedResult<TendersApi.Domain.Tender>>.Success(
-                new PaginatedResult<TendersApi.Domain.Tender> { Items = tenders, Page = page, Size = tenders.Count() });
+            return Result<PaginatedResult<Domain.Tender>>.Success(
+                new PaginatedResult<Domain.Tender> { Items = tenders, Page = page, Size = tenders.Count() });
         }
     }
 }

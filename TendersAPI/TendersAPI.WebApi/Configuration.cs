@@ -1,11 +1,12 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using TendersApi.App.Handlers;
 using TendersApi.App.Interfaces;
-using TendersAPI.Infrastucture;
-using TendersAPI.Infrastucture.Mapping;
-using TendersAPI.Infrastucture.Settings;
+using TendersApi.Infrastucture.Mapping;
+using TendersApi.Infrastucture.Repositories;
+using TendersApi.Infrastucture.Settings;
 
-namespace TendersAPI.WebApi
+namespace TendersApi.WebApi
 {
     public static class ConfigurationExtensions
     {
@@ -20,10 +21,19 @@ namespace TendersAPI.WebApi
 
             // Exception from the rule not to referece infra in WebApi (allowed by clean achritecture)
             builder.Services.AddSingleton<ITenderMapper, TenderMapper>();
-            builder.Services.AddHttpClient<ITenderRepository, TenderRespository>((sp, client) =>
+            builder.Services.AddHttpClient<TenderRespository>((sp, client) =>
             {
                 var settings = sp.GetRequiredService<IOptions<TenderApiSettings>>().Value;
                 client.BaseAddress = new Uri(settings.BaseUrl);
+            });
+
+            builder.Services.AddScoped<ITenderRepository, CachedTenderRepository>(sp =>
+            {
+                var inner = sp.GetRequiredService<TenderRespository>();
+                var cache = sp.GetRequiredService<IDistributedCache>();
+
+                return new CachedTenderRepository(cache, inner);
+
             });
 
             return builder;

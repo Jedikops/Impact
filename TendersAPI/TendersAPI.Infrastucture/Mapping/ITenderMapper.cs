@@ -1,4 +1,4 @@
-﻿namespace TendersAPI.Infrastucture.Mapping
+﻿namespace TendersApi.Infrastucture.Mapping
 {
     public interface ITenderMapper
     {

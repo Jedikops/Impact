@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace TendersAPI.Infrastucture.Converters
+namespace TendersApi.Infrastucture.Converters
 {
     internal class IntFromStringConverter : JsonConverter<int>
     {

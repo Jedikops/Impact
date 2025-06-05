@@ -3,9 +3,25 @@
 GET {{TendersAPI.Service_HostAddress}}/api/tenders/
 Accept: application/json
 
+
+
 ###
 
-GET {{TendersAPI.Service_HostAddress}}/api/tenders?page=200
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?page=10
+Accept: application/json
+
+###
+
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?page=20
+Accept: application/json
+###
+
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?page=30
+Accept: application/json
+
+###
+
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?page=55
 Accept: application/json
 
 ###

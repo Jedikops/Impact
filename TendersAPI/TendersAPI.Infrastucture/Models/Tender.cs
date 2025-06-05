@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using TendersAPI.Infrastucture.Converters;
+using TendersApi.Infrastucture.Converters;
 
 namespace TendersApi.Infrastructure.Models
 {
@@ -21,6 +21,6 @@ namespace TendersApi.Infrastructure.Models
         public required string Title { get; init; }
 
         [JsonPropertyName("description")] 
-        public required string Description { get; init; }
+        public string? Description { get; init; }
     }
 }

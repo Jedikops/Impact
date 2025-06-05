@@ -10,8 +10,4 @@
     <ProjectReference Include="..\TendersApi.Domain\TendersApi.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Validators\" />
-  </ItemGroup>
-
 </Project>

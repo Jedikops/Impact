@@ -1,4 +1,4 @@
-﻿namespace TendersAPI.Infrastucture.Settings
+﻿namespace TendersApi.Infrastucture.Settings
 {
     public class TenderApiSettings
     {
