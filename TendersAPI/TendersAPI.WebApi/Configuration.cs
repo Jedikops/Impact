@@ -16,7 +16,7 @@ namespace TendersApi.WebApi
 {
     public static class ConfigurationExtensions
     {
- 
+
         public static TBuilder RegisterServices<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
         {
             builder.Services.Configure<TenderApiSettings>(builder.Configuration.GetSection("ApiSettings"));
@@ -32,13 +32,17 @@ namespace TendersApi.WebApi
             {
                 var settings = sp.GetRequiredService<IOptions<TenderApiSettings>>().Value;
                 client.BaseAddress = new Uri(settings.BaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(60);
             }).AddPolicyHandler(
                 Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromMinutes(1))
-                .WrapAsync(Policy.Handle<HttpRequestException>().RetryAsync(3))
-            );
+                .WrapAsync(Policy.Handle<HttpRequestException>().RetryForeverAsync
+                ((Action<Exception, int>)((ex, retryCount) =>
+                {
+                    Log.Warning("Retrying request due to: {Exception}, attempt: {RetryCount}", ex.Message, retryCount);
+                }))));
 
 
-            builder.Services.AddScoped<ITenderRepository, CachedTenderRepository>(sp =>
+            builder.Services.AddSingleton<ITenderRepository, CachedTenderRepository>(sp =>
             {
                 var inner = sp.GetRequiredService<TenderRespository>();
                 var cache = sp.GetRequiredService<IDistributedCache>();
