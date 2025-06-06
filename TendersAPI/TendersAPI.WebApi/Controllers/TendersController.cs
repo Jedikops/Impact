@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using TendersApi.App.Common;
 using TendersApi.App.Handlers;
 using TendersApi.App.Queries;
+using TendersApi.Domain;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TendersApi.WebApi.Controllers
 {
@@ -21,9 +23,25 @@ namespace TendersApi.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] DateTime? before = null, [FromQuery] DateTime? after = null)
+        public async Task<IActionResult> Get([FromQuery] int page = 1,
+            [FromQuery] DateTime? before = null,
+            [FromQuery] DateTime? after = null,
+            [FromQuery] OrderBy orderBy = 0)
         {
-            var result = await _getTendersHandler.Handle(new GetTendersQuery { Page = page, Before = before ?? DateTime.Now, After = after });
+
+            if(!Enum.IsDefined(typeof(OrderBy), orderBy))
+            {
+                return BadRequest();
+            }
+
+            var result = await _getTendersHandler.Handle(
+                new GetTendersQuery
+                {
+                    Page = page,
+                    Before = before,
+                    After = after,
+                    OrderBy = orderBy
+                });
 
             if (result.IsSuccess)
                 return Ok(result);

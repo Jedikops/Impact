@@ -22,5 +22,8 @@ namespace TendersApi.Infrastructure.Models
 
         [JsonPropertyName("description")] 
         public string? Description { get; init; }
+
+        [JsonPropertyName("awarded_value_eur")]
+        public required string Value { get; init; }
     }
 }

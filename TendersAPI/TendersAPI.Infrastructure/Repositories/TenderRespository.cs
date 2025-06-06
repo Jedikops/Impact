@@ -13,6 +13,8 @@ namespace TendersApi.Infrastucture.Repositories
         private readonly IDistributedCache _cache;
         private ITenderMapper _mapper;
 
+        private readonly int _maxPage = 100;
+
         public TenderRespository(HttpClient client, IDistributedCache cache, ITenderMapper mapper)
         {
             _client = client;
@@ -25,9 +27,9 @@ namespace TendersApi.Infrastucture.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<Result<PaginatedResult<Domain.Tender>>> GetTendersAsync(int page)
+        public async Task<Result<PaginatedResult<Domain.Tender>>> GetAsync(int page)
         {
-            if (page > 100)
+            if (page > _maxPage)
             {
                 return Result<PaginatedResult<Domain.Tender>>.Failure(ResultStatus.ValidationError, "Out of bounds");
             }
@@ -55,6 +57,46 @@ namespace TendersApi.Infrastucture.Repositories
 
             return Result<PaginatedResult<Domain.Tender>>.Success(
                 new PaginatedResult<Domain.Tender> { Items = tenders, Page = page, Size = tenders.Count() });
+        }
+
+        public async IAsyncEnumerable<Result<PaginatedResult<Domain.Tender>>> GetAllAsync()
+        {
+            int concurrencyLimit = 10;
+            using var semaphore = new SemaphoreSlim(concurrencyLimit);
+            var tasks = new List<Task<Result<PaginatedResult<Domain.Tender>>>>();
+
+            for (int page = 1; page <= _maxPage; page++)
+            {
+                await semaphore.WaitAsync();
+
+                int currentPage = page;
+
+                var task = Task.Run(async () =>
+                {
+                    try
+                    {
+                        return await GetAsync(currentPage);
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+                });
+
+                tasks.Add(task);
+
+                if (tasks.Count >= concurrencyLimit)
+                {
+                    var finished = await Task.WhenAny(tasks);
+                    tasks.Remove(finished);
+                    yield return await finished;
+                }
+            }
+
+            foreach (var task in tasks)
+            {
+                yield return await task;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using TendersApi.App.Common;
 using TendersApi.App.Interfaces;
@@ -18,47 +19,56 @@ namespace TendersApi.App.Handlers
 
         public async Task<Result<PaginatedResult<Tender>>> Handle(GetTendersQuery query)
         {
-            var mathingTenders = new List<Tender>();
+            var tenders = new List<Tender>();
             int repoPage = 1;
 
-
-
-            while (mathingTenders.Count < query.Page * query.PageSize)
+            if (!IsFullListRequired(query)) //Since user wants to get a page with filtering and/or ordering we've got to pull everything
             {
-                var tendersResult = await _repository.GetTendersAsync(repoPage);
+                return await _repository.GetAsync(query.Page);
+            }
 
-                if (!tendersResult.IsSuccess)
-                {
-                    return tendersResult;
-                }
+            await foreach (var result in _repository.GetAllAsync()) {
+                if (!result.IsSuccess)
+                    return Result<PaginatedResult<Tender>>.Failure(ResultStatus.ExternalApiError, "missing chunks of data");
 
-                if (tendersResult.Value != null)
+                tenders.AddRange(result.Value.Items);
+            }
+
+            if (query.OrderBy != OrderBy.NotSet)
+            {
+                tenders = query.OrderBy switch
                 {
-                    var filtered = tendersResult.Value.Items
+                    OrderBy.DateAscending => tenders.OrderBy(t => t.Date).ToList(),
+                    OrderBy.DateDescending => tenders.OrderByDescending(t => t.Date).ToList(),
+                    OrderBy.ValueAscending => tenders.OrderBy(t => t.Value).ToList(),
+                    OrderBy.ValueDescending => tenders.OrderByDescending(t => t.Value).ToList(),
+                    _ => tenders
+                };
+            }
+
+            if (query.After != null || query.Before != null)
+            {
+                tenders = tenders
                         .Where(x =>
                             (!query.After.HasValue || x.Date >= query.After.Value) &&
                             (!query.Before.HasValue || x.Date < query.Before.Value))
                         .ToList();
-
-                    mathingTenders.AddRange(filtered);
-
-                    if (tendersResult.Value.Items.Count() < query.PageSize) break; //Not enough elements in repo matching condition
-
-                    repoPage++;
-                    continue;
-                }
-
-                return Result<PaginatedResult<Tender>>.Failure(ResultStatus.ExternalApiError, "Unknown error");
-
             }
 
-            var skippedItems = mathingTenders.Skip((query.Page - 1) * query.PageSize).ToList();
+            var skippedItems = tenders.Skip((query.Page - 1) * query.PageSize).ToList();
+
+
             return Result<PaginatedResult<Tender>>.Success(new PaginatedResult<Tender>()
             {
                 Items = skippedItems,
                 Page = query.Page,
                 Size = query.PageSize
             });
+        }
+
+        private bool IsFullListRequired(GetTendersQuery query)
+        {
+            return query.OrderBy != OrderBy.NotSet || query.After != null || query.Before != null;
         }
     }
 }

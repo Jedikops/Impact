@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
+using Polly.Extensions.Http;
+using Polly;
 using TendersApi.App.Handlers;
 using TendersApi.App.Interfaces;
 using TendersApi.Infrastucture.Mapping;
@@ -25,7 +27,12 @@ namespace TendersApi.WebApi
             {
                 var settings = sp.GetRequiredService<IOptions<TenderApiSettings>>().Value;
                 client.BaseAddress = new Uri(settings.BaseUrl);
-            });
+                client.Timeout = TimeSpan.FromMinutes(2);
+            }).AddPolicyHandler(
+                Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(30))
+                .WrapAsync(Policy.Handle<HttpRequestException>().RetryAsync(3))
+            );
+
 
             builder.Services.AddScoped<ITenderRepository, CachedTenderRepository>(sp =>
             {
