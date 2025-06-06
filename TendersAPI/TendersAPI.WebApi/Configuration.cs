@@ -1,17 +1,22 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Polly.Extensions.Http;
 using Polly;
+using Serilog;
 using TendersApi.App.Handlers;
 using TendersApi.App.Interfaces;
 using TendersApi.Infrastucture.Mapping;
 using TendersApi.Infrastucture.Repositories;
 using TendersApi.Infrastucture.Settings;
+using TendersAPI.WebApi.Middlewares;
 
 namespace TendersApi.WebApi
 {
     public static class ConfigurationExtensions
     {
+ 
         public static TBuilder RegisterServices<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
         {
             builder.Services.Configure<TenderApiSettings>(builder.Configuration.GetSection("ApiSettings"));
@@ -27,9 +32,8 @@ namespace TendersApi.WebApi
             {
                 var settings = sp.GetRequiredService<IOptions<TenderApiSettings>>().Value;
                 client.BaseAddress = new Uri(settings.BaseUrl);
-                client.Timeout = TimeSpan.FromMinutes(2);
             }).AddPolicyHandler(
-                Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(30))
+                Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromMinutes(1))
                 .WrapAsync(Policy.Handle<HttpRequestException>().RetryAsync(3))
             );
 

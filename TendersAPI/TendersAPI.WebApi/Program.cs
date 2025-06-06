@@ -1,4 +1,7 @@
+using Serilog;
 using TendersApi.WebApi;
+using TendersAPI.WebApi.Filters;
+using TendersAPI.WebApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,10 +10,16 @@ builder.AddServiceDefaults();
 
 builder.RegisterServices();
 
-builder.Services.AddControllers();
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Services.AddControllers((options) =>
+{
+    options.Filters.Add<LogBadRequestAndStatusCodeFilter>();
+});
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-
-
 
 builder.Services.AddOpenApi();
 
@@ -30,4 +39,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseMiddleware<BadRequestLoggingMiddleware>();
+
 app.Run();
+

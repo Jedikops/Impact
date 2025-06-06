@@ -48,10 +48,10 @@ namespace TendersApi.WebApi.Controllers
 
             return result.Status switch
             {
-                ResultStatus.ValidationError => BadRequest(new { error = result.Error }),
-                ResultStatus.NotFound => NotFound(new { error = result.Error }),
-                ResultStatus.ExternalApiError => StatusCode(502, new { error = result.Error }),
-                _ => StatusCode(500, new { error = "Internal server error" }),
+                ResultStatus.ValidationError => BadRequest(result),
+                ResultStatus.NotFound => NotFound(result),
+                ResultStatus.ExternalApiError => StatusCode(502, result),
+                _ => StatusCode(500, result),
             };
         }
 
