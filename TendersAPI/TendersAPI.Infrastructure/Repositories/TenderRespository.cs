@@ -34,10 +34,11 @@ namespace TendersApi.Infrastucture.Repositories
                 return Result<PaginatedResult<Domain.Tender>>.Failure(ResultStatus.ValidationError, "Out of bounds");
             }
 
-            var response = await _client.GetAsync(_client.BaseAddress + $"?page={page}");
 
+            HttpResponseMessage response;
             try
             {
+                response = await _client.GetAsync(_client.BaseAddress + $"?page={page}");
                 response.EnsureSuccessStatusCode();
             }
             catch (HttpRequestException ex)
@@ -45,7 +46,7 @@ namespace TendersApi.Infrastucture.Repositories
                 return ex.StatusCode switch
                 {
                     System.Net.HttpStatusCode.BadRequest => Result<PaginatedResult<Domain.Tender>>.Failure(ResultStatus.InternalError, "External Api bad request"),
-                    _ => Result<PaginatedResult<Domain.Tender>>.Failure(ResultStatus.ExternalApiError, "External Api bad request"),
+                    _ => Result<PaginatedResult<Domain.Tender>>.Failure(ResultStatus.ExternalApiError, "External Api error"),
                 };
             }
 
