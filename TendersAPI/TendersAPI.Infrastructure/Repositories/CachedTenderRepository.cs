@@ -69,26 +69,7 @@ namespace TendersApi.Infrastucture.Repositories
                 {
                     try
                     {
-                        string cacheKey = $"{_tenderCacheKey}{currentPage}";
-                        var cached = await _cache.GetStringAsync(cacheKey);
-
-                        if (!string.IsNullOrEmpty(cached))
-                        {
-                            var cachedResult = JsonSerializer.Deserialize<PaginatedResult<Domain.Tender>>(cached)!;
-                            return Result<PaginatedResult<Domain.Tender>>.Success(cachedResult);
-                        }
-
-                        var result = await _innerRepository.GetAsync(currentPage);
-
-                        if (result.IsSuccess && result.Value != null)
-                        {
-                            var options = new DistributedCacheEntryOptions
-                            {
-                                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
-                            };
-
-                            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(result.Value), options);
-                        }
+                       var result = await this.GetAsync(currentPage);
 
                         return result;
                     }
