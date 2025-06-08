@@ -11,7 +11,7 @@ Accept: application/json
 ###
 
 
-GET {{TendersAPI.Service_HostAddress}}/api/tenders?before=2022-06-06T00:00:00&after=2021-03-06T00:00:00&page=3
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?before=2022-06-06T00:00:00&after=2022-03-06T00:00:00&page=1
 Accept: application/json
 
 ###

@@ -60,12 +60,11 @@ namespace TendersApi.Infrastucture.Repositories
                 new PaginatedResult<Domain.Tender> { Items = tenders, Page = page, Size = tenders.Count() });
         }
 
-        public async Task<List<Result<PaginatedResult<Domain.Tender>>>> GetAllAsync()
+        public async IAsyncEnumerable<Result<PaginatedResult<Domain.Tender>>> GetAllAsync()
         {
             int concurrencyLimit = 10;
             using var semaphore = new SemaphoreSlim(concurrencyLimit);
             var tasks = new List<Task<Result<PaginatedResult<Domain.Tender>>>>();
-            var results = new List<Result<PaginatedResult<Domain.Tender>>>();
 
             for (int page = 1; page <= _maxPage; page++)
             {
@@ -86,19 +85,20 @@ namespace TendersApi.Infrastucture.Repositories
 
                 tasks.Add(task);
 
+                // If the concurrency limit is hit, wait for the next available task to complete and yield it
                 if (tasks.Count >= concurrencyLimit)
                 {
-                    var finishedTask = await Task.WhenAny(tasks);
-                    tasks.Remove(finishedTask);
-                    results.Add(await finishedTask);
+                    var completedTask = await Task.WhenAny(tasks);
+                    tasks.Remove(completedTask);
+                    yield return await completedTask;
                 }
             }
 
-            // Await the remaining tasks
-            var remaining = await Task.WhenAll(tasks);
-            results.AddRange(remaining);
-
-            return results;
+            // Await and yield remaining tasks
+            foreach (var remainingTask in tasks)
+            {
+                yield return await remainingTask;
+            }
         }
     }
 }

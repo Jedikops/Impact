@@ -27,10 +27,9 @@ namespace TendersApi.App.Handlers
                 return await _repository.GetAsync(query.Page);
             }
 
-            var results = await _repository.GetAllAsync();
 
-            foreach (var result in results) {
-                if (!result.IsSuccess)
+            await foreach(var result in _repository.GetAllAsync()) {
+                if (!result.IsSuccess || result.Value == null)
                     return Result<PaginatedResult<Tender>>.Failure(ResultStatus.ExternalApiError, "missing chunks of data");
 
                 tenders.AddRange(result.Value.Items);

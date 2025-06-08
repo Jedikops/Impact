@@ -16,7 +16,7 @@ namespace TendersApi.Infrastucture.Repositories
         private readonly int _maxPage = 100;
         private const int _concurrencyLimit = 10;
         private SemaphoreSlim semaphore = new SemaphoreSlim(_concurrencyLimit);
-        private bool hasLoaded = false;
+
         public CachedTenderRepository(IDistributedCache cache, ITenderRepository innerRepository)
         {
             _cache = cache;
@@ -53,15 +53,13 @@ namespace TendersApi.Infrastucture.Repositories
             return result;
         }
 
-        public async Task<List<Result<PaginatedResult<Domain.Tender>>>> GetAllAsync()
+        public async IAsyncEnumerable<Result<PaginatedResult<Domain.Tender>>> GetAllAsync()
         {
-
-            var tasks = new List<Task<Result<PaginatedResult<Domain.Tender>>>>();
-            var results = new List<Result<PaginatedResult<Domain.Tender>>>();
+            var pendingTasks = new List<Task<Result<PaginatedResult<Domain.Tender>>>>();
 
             for (int page = 1; page <= _maxPage; page++)
             {
-                semaphore.Wait();
+                await semaphore.WaitAsync(); // Use WaitAsync for async/await correctness
 
                 int currentPage = page;
 
@@ -69,9 +67,7 @@ namespace TendersApi.Infrastucture.Repositories
                 {
                     try
                     {
-                       var result = await this.GetAsync(currentPage);
-
-                        return result;
+                        return await GetAsync(currentPage);
                     }
                     finally
                     {
@@ -79,23 +75,20 @@ namespace TendersApi.Infrastucture.Repositories
                     }
                 });
 
-                tasks.Add(task);
+                pendingTasks.Add(task);
 
-                if (tasks.Count >= _concurrencyLimit)
+                if (pendingTasks.Count >= _concurrencyLimit)
                 {
-                    var completedTask = await Task.WhenAny(tasks);
-                    tasks.Remove(completedTask);
-                    results.Add(await completedTask);
+                    var completedTask = await Task.WhenAny(pendingTasks);
+                    pendingTasks.Remove(completedTask);
+                    yield return await completedTask;
                 }
             }
 
-            var remaining = await Task.WhenAll(tasks);
-            results.AddRange(remaining);
-
-
-            return results;
-
-
+            foreach (var remainingTask in pendingTasks)
+            {
+                yield return await remainingTask;
+            }
         }
 
     }
