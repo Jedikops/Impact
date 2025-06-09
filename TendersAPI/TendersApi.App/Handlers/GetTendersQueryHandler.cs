@@ -27,14 +27,29 @@ namespace TendersApi.App.Handlers
                 return await _repository.GetAsync(query.Page);
             }
 
-
-            await foreach(var result in _repository.GetAllAsync()) {
+            await foreach (var result in _repository.GetAllAsync())
+            {
                 if (!result.IsSuccess || result.Value == null)
                     return Result<PaginatedResult<Tender>>.Failure(ResultStatus.ExternalApiError, "missing chunks of data");
 
                 tenders.AddRange(result.Value.Items);
             }
 
+            tenders = ApplyFilters(query, tenders);
+            tenders = ApplyOrder(query, tenders);
+
+            var skippedItems = tenders.Skip((query.Page - 1) * query.PageSize).ToList();
+
+            return Result<PaginatedResult<Tender>>.Success(new PaginatedResult<Tender>()
+            {
+                Items = skippedItems,
+                Page = query.Page,
+                Size = query.PageSize
+            });
+        }
+
+        private List<Tender> ApplyOrder(GetTendersQuery query, List<Tender> tenders)
+        {
             if (query.OrderBy != OrderBy.NotSet)
             {
                 tenders = query switch
@@ -47,25 +62,23 @@ namespace TendersApi.App.Handlers
                 };
             }
 
+            return tenders;
+        }
+
+        private List<Tender> ApplyFilters(GetTendersQuery query, List<Tender> tenders)
+        {
             if (query.After != null || query.Before != null)
             {
                 tenders = tenders
                         .Where(x =>
                             (!query.After.HasValue || x.Date >= query.After.Value) &&
                             (!query.Before.HasValue || x.Date < query.Before.Value) &&
-                            (query.GreaterThan >= 0 && x.Value > query.GreaterThan) && 
+                            (query.GreaterThan >= 0 && x.Value > query.GreaterThan) &&
                             (query.LessThan >= 0 && x.Value < query.LessThan))
                         .ToList();
             }
 
-            var skippedItems = tenders.Skip((query.Page - 1) * query.PageSize).ToList();
-
-            return Result<PaginatedResult<Tender>>.Success(new PaginatedResult<Tender>()
-            {
-                Items = skippedItems,
-                Page = query.Page,
-                Size = query.PageSize
-            });
+            return tenders;
         }
 
         private bool IsFullListRequired(GetTendersQuery query)

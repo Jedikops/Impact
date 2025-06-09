@@ -5,7 +5,7 @@ using TendersApi.App.Handlers;
 using TendersApi.App.Interfaces;
 using TendersApi.App.Queries;
 using TendersApi.Domain;
-using TendersApi.Tests.Extensions; 
+using TendersApi.Tests.Extensions;
 
 namespace TendersApi.Tests
 {
@@ -17,6 +17,7 @@ namespace TendersApi.Tests
         private readonly GetTendersQueryHandler _queryTenderHandler;
         public UnitTests()
         {
+
             var index = 1;
             var page = 1;
 
@@ -25,17 +26,7 @@ namespace TendersApi.Tests
             DateTime oldest = DateTime.MaxValue;
             DateTime newest = DateTime.MinValue;
 
-            _fakePaginatedResult = new Faker<Result<PaginatedResult<Tender>>>()
-                .RuleFor(p => p.IsSuccess, f => true)
-                .RuleFor(p => p.Error, f => null)
-                .RuleFor(p => p.Value, f =>
-                {
-                    return new Faker<PaginatedResult<Tender>>()
-                           .RuleFor(p => p.Page, f => page++)
-                           .RuleFor(p => p.Size, f => 100)
-                           .RuleFor(p => p.Items, f =>
-                           {
-                               return new Faker<Tender>()
+            var tenderFaker = new Faker<Tender>()
                                    .RuleFor(t => t.Id, f => index++)
                                    .RuleFor(t => t.Title, f => f.Commerce.ProductName())
                                    .RuleFor(t => t.Description, f => f.Lorem.Paragraph())
@@ -52,12 +43,25 @@ namespace TendersApi.Tests
                                        minValue = val < minValue ? val : minValue;
                                        maxValue = val > maxValue ? val : maxValue;
                                        return val;
-                                   }).Generate(100);
-                           });
-                }).Generate(100);
+                                   });
+
+            var paginatedResultFaker = new Faker<PaginatedResult<Tender>>()
+                           .RuleFor(p => p.Page, f => page++)
+                           .RuleFor(p => p.Size, f => 100)
+                           .RuleFor(p => p.Items, f => tenderFaker.Generate(100));
+
+
+
+
+            var _fakePaginatedResult = new Faker<Result<PaginatedResult<Tender>>>()
+                 .CustomInstantiator(f => Result<PaginatedResult<Tender>>.Success(paginatedResultFaker.Generate()))
+                 .RuleFor(p => p.IsSuccess, f => true)
+                 .RuleFor(p => p.Error, f => null);
+
+
 
             _mockRepo = new Mock<ITenderRepository>();
-            _mockRepo.Setup(repo => repo.GetAllAsync()).Returns(_fakePaginatedResult.GetFakePaginatedResultAsync());
+            _mockRepo.Setup(repo => repo.GetAllAsync()).Returns(_fakePaginatedResult.Generate(100).GetFakePaginatedResultAsync());
 
             _queryTenderHandler = new GetTendersQueryHandler(_mockRepo.Object);
 
@@ -65,48 +69,45 @@ namespace TendersApi.Tests
 
         public void Dispose()
         {
-            
+
         }
 
-        //[Theory]
-        //[InlineData(new GetTendersQuery() { })] // TODO: tomorrow
-        public void TestTenderseQuery()
+        [Theory]
+        [ClassData(typeof(TendersTestData))]
+        public async Task TestTenderseFilters(GetTendersQuery getTendersQuery)
         {
-          //  _queryTenderHandler.Handle()
-            Assert.True(true);
+            var tendersResult = await _queryTenderHandler.Handle(getTendersQuery);
+
+            Assert.DoesNotContain(tendersResult.Value.Items,
+                x => x.Date < getTendersQuery.Before &&
+                x.Date > getTendersQuery.After &&
+                x.Value > getTendersQuery.GreaterThan &&
+                x.Value < getTendersQuery.LessThan);
+
         }
 
-        // Instructions:
-        // 1. Add a project reference to the target AppHost project, e.g.:
-        //
-        //    <ItemGroup>
-        //        <ProjectReference Include="../MyAspireApp.AppHost/MyAspireApp.AppHost.csproj" />
-        //    </ItemGroup>
-        //
-        // 2. Uncomment the following example test and update 'Projects.MyAspireApp_AppHost' to match your AppHost project:
-        //
-        // [Fact]
-        // public async Task GetWebResourceRootReturnsOkStatusCode()
-        // {
-        //     // Arrange
-        //     var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.MyAspireApp_AppHost>();
-        //     appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
-        //     {
-        //         clientBuilder.AddStandardResilienceHandler();
-        //     });
-        //     // To output logs to the xUnit.net ITestOutputHelper, consider adding a package from https://www.nuget.org/packages?q=xunit+logging
-        //
-        //     await using var app = await appHost.BuildAsync();
-        //     var resourceNotificationService = app.Services.GetRequiredService<ResourceNotificationService>();
-        //     await app.StartAsync();
+        [Theory]
+        [ClassData(typeof(TendersTestData))]
+        public async Task TestTenderseOrder(GetTendersQuery getTendersQuery)
+        {
+            var tendersResult = await _queryTenderHandler.Handle(getTendersQuery);
 
-        //     // Act
-        //     var httpClient = app.CreateHttpClient("webfrontend");
-        //     await resourceNotificationService.WaitForResourceAsync("webfrontend", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
-        //     var response = await httpClient.GetAsync("/");
+            Assert.True(getTendersQuery switch
+            {
+                { OrderBy: OrderBy.Date, OrderByDirection: OrderByDirection.Descending } => 
+                    tendersResult.Value.Items.SequenceEqual(tendersResult.Value.Items.OrderByDescending(t => t.Date)),
+                { OrderBy: OrderBy.Date, OrderByDirection: OrderByDirection.Ascending } => 
+                    tendersResult.Value.Items.SequenceEqual(tendersResult.Value.Items.OrderBy(t => t.Date)),
 
-        //     // Assert
-        //     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        // }
+                { OrderBy: OrderBy.Value, OrderByDirection: OrderByDirection.Descending } =>
+                    tendersResult.Value.Items.SequenceEqual(tendersResult.Value.Items.OrderByDescending(t => t.Value)),
+
+                { OrderBy: OrderBy.Value, OrderByDirection: OrderByDirection.Ascending } =>
+                    tendersResult.Value.Items.SequenceEqual(tendersResult.Value.Items.OrderBy(t => t.Value)),
+
+                _ => true
+            });
+
+        }
     }
 }
