@@ -41,13 +41,24 @@ namespace TendersApi.WebApi
                     Log.Warning("Retrying request due to: {Exception}, attempt: {RetryCount}", ex.Message, retryCount);
                 }))));
 
+            builder.Services.AddSingleton<TenderRespository>(sp => {
+                
+                var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(TenderRespository));
+                var cache = sp.GetRequiredService<IDistributedCache>();
+                var mapper = sp.GetRequiredService<ITenderMapper>();
+                var settings = sp.GetRequiredService<IOptions<TenderApiSettings>>().Value;
+
+                return new TenderRespository(httpClient, cache, mapper, settings.ConcurrencyLimit);
+
+            });
 
             builder.Services.AddSingleton<ITenderRepository, CachedTenderRepository>(sp =>
             {
+                var settings = sp.GetRequiredService<IOptions<TenderApiSettings>>().Value;
                 var inner = sp.GetRequiredService<TenderRespository>();
                 var cache = sp.GetRequiredService<IDistributedCache>();
 
-                return new CachedTenderRepository(cache, inner);
+                return new CachedTenderRepository(cache, inner, settings.ConcurrencyLimit);
 
             });
 

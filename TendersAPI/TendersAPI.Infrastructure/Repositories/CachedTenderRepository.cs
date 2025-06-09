@@ -14,13 +14,15 @@ namespace TendersApi.Infrastucture.Repositories
         private readonly IDistributedCache _cache;
         private readonly ITenderRepository _innerRepository;
         private readonly int _maxPage = 100;
-        private const int _concurrencyLimit = 10;
-        private SemaphoreSlim semaphore = new SemaphoreSlim(_concurrencyLimit);
+        private int _concurrencyLimit;
+        private SemaphoreSlim _semaphore;
 
-        public CachedTenderRepository(IDistributedCache cache, ITenderRepository innerRepository)
+        public CachedTenderRepository(IDistributedCache cache, ITenderRepository innerRepository, int concurrencyLimit)
         {
             _cache = cache;
             _innerRepository = innerRepository;
+            _concurrencyLimit = concurrencyLimit;
+            _semaphore = new SemaphoreSlim(_concurrencyLimit);
         }
         public Task<Tender> GetTenderByIdAsync(int id)
         {
@@ -59,7 +61,7 @@ namespace TendersApi.Infrastucture.Repositories
 
             for (int page = 1; page <= _maxPage; page++)
             {
-                await semaphore.WaitAsync(); // Use WaitAsync for async/await correctness
+                await _semaphore.WaitAsync(); // Use WaitAsync for async/await correctness
 
                 int currentPage = page;
 
@@ -71,7 +73,7 @@ namespace TendersApi.Infrastucture.Repositories
                     }
                     finally
                     {
-                        semaphore.Release();
+                        _semaphore.Release();
                     }
                 });
 

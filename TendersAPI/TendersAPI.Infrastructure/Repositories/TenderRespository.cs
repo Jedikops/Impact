@@ -12,14 +12,15 @@ namespace TendersApi.Infrastucture.Repositories
         private readonly HttpClient _client;
         private readonly IDistributedCache _cache;
         private ITenderMapper _mapper;
-
+        private int _concurrencyLimit = 10;
         private readonly int _maxPage = 100;
 
-        public TenderRespository(HttpClient client, IDistributedCache cache, ITenderMapper mapper)
+        public TenderRespository(HttpClient client, IDistributedCache cache, ITenderMapper mapper, int concurrentyLimit)
         {
             _client = client;
             _cache = cache;
             _mapper = mapper;
+            _concurrencyLimit = concurrentyLimit;
         }
 
         public Task<TendersApi.Domain.Tender> GetTenderByIdAsync(int id)
@@ -62,8 +63,8 @@ namespace TendersApi.Infrastucture.Repositories
 
         public async IAsyncEnumerable<Result<PaginatedResult<Domain.Tender>>> GetAllAsync()
         {
-            int concurrencyLimit = 10;
-            using var semaphore = new SemaphoreSlim(concurrencyLimit);
+            
+            using var semaphore = new SemaphoreSlim(_concurrencyLimit);
             var tasks = new List<Task<Result<PaginatedResult<Domain.Tender>>>>();
 
             for (int page = 1; page <= _maxPage; page++)
@@ -86,7 +87,7 @@ namespace TendersApi.Infrastucture.Repositories
                 tasks.Add(task);
 
                 // If the concurrency limit is hit, wait for the next available task to complete and yield it
-                if (tasks.Count >= concurrencyLimit)
+                if (tasks.Count >= _concurrencyLimit)
                 {
                     var completedTask = await Task.WhenAny(tasks);
                     tasks.Remove(completedTask);
