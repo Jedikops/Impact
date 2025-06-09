@@ -1,4 +1,5 @@
 using Serilog;
+using TendersApi.Infrastucture.Settings;
 using TendersApi.WebApi;
 using TendersAPI.WebApi.Filters;
 using TendersAPI.WebApi.Middlewares;
@@ -42,4 +43,3 @@ app.MapControllers();
 app.UseMiddleware<BadRequestLoggingMiddleware>();
 
 app.Run();
-

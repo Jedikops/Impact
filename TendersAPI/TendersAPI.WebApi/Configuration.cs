@@ -47,8 +47,9 @@ namespace TendersApi.WebApi
                 var cache = sp.GetRequiredService<IDistributedCache>();
                 var mapper = sp.GetRequiredService<ITenderMapper>();
                 var settings = sp.GetRequiredService<IOptions<TenderApiSettings>>().Value;
+                var logger = sp.GetRequiredService<ILogger<TenderRespository>>();
 
-                return new TenderRespository(httpClient, cache, mapper, settings.ConcurrencyLimit);
+                return new TenderRespository(httpClient, cache, mapper, settings.ConcurrencyLimit, logger);
 
             });
 

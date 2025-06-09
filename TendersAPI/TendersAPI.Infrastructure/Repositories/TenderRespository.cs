@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using TendersApi.App.Common;
 using TendersApi.App.Interfaces;
 using TendersApi.Infrastructure.Models;
 using TendersApi.Infrastucture.Mapping;
+using TendersApi.Infrastucture.Settings;
 
 namespace TendersApi.Infrastucture.Repositories
 {
@@ -13,14 +15,16 @@ namespace TendersApi.Infrastucture.Repositories
         private readonly IDistributedCache _cache;
         private ITenderMapper _mapper;
         private int _concurrencyLimit = 10;
+        private ILogger _logger;
         private readonly int _maxPage = 100;
 
-        public TenderRespository(HttpClient client, IDistributedCache cache, ITenderMapper mapper, int concurrentyLimit)
+        public TenderRespository(HttpClient client, IDistributedCache cache, ITenderMapper mapper, int concurrentyLimit, ILogger logger)
         {
             _client = client;
             _cache = cache;
             _mapper = mapper;
             _concurrencyLimit = concurrentyLimit;
+            _logger = logger;
         }
 
         public Task<TendersApi.Domain.Tender> GetTenderByIdAsync(int id)
@@ -30,6 +34,9 @@ namespace TendersApi.Infrastucture.Repositories
 
         public async Task<Result<PaginatedResult<Domain.Tender>>> GetAsync(int page)
         {
+
+            _logger.LogInformation($"Application started successfully with concurrency limit of {_concurrencyLimit}");
+
             if (page > _maxPage)
             {
                 return Result<PaginatedResult<Domain.Tender>>.Failure(ResultStatus.ValidationError, "Out of bounds");

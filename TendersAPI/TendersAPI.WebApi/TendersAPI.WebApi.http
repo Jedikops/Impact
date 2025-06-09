@@ -1,5 +1,4 @@
 @TendersAPI.Service_HostAddress = http://localhost:5220
-
 GET {{TendersAPI.Service_HostAddress}}/api/tenders/
 Accept: application/json
 
