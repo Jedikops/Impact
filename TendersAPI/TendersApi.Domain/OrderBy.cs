@@ -3,9 +3,7 @@
     public enum OrderBy
     {
         NotSet,
-        DateAscending,
-        DateDescending,
-        ValueAscending,
-        ValueDescending
+        Date,
+        Value
     }
 }

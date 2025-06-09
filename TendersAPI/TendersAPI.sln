@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.36105.23 d17.13
+VisualStudioVersion = 17.13.36105.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TendersAPI.AppHost", "TendersAPI.AppHost\TendersAPI.AppHost.csproj", "{CFD1DEE9-7DB7-48C8-8134-BCA52ED42CC3}"
 EndProject
@@ -15,6 +15,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TendersAPI.Infrastructure", "TendersAPI.Infrastructure\TendersAPI.Infrastructure.csproj", "{A47554A2-1A70-4067-A164-DC8AFBD50706}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspire", "Aspire", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TendersApi.Tests", "TendersApi.Tests\TendersApi.Tests.csproj", "{B64301B2-6783-4F36-8129-16A003D7A460}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +48,10 @@ Global
 		{A47554A2-1A70-4067-A164-DC8AFBD50706}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A47554A2-1A70-4067-A164-DC8AFBD50706}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A47554A2-1A70-4067-A164-DC8AFBD50706}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B64301B2-6783-4F36-8129-16A003D7A460}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B64301B2-6783-4F36-8129-16A003D7A460}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B64301B2-6783-4F36-8129-16A003D7A460}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B64301B2-6783-4F36-8129-16A003D7A460}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

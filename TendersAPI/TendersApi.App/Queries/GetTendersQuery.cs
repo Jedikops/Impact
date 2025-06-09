@@ -12,12 +12,16 @@ namespace TendersApi.App.Queries
     public class GetTendersQuery
     {
         public int Page { get; init; }
-        public DateTime? Before { get; init; } 
-        public DateTime? After { get; init; } 
+        public DateTime? Before { get; init; }
+        public DateTime? After { get; init; }
 
         public int PageSize { get; private init; } = 100;
 
         public OrderBy OrderBy { get; init; }
+        public OrderByDirection OrderByDirection { get; init; } = OrderByDirection.Ascending;
+
+        public int LessThan { get; init; }  = -1;
+        public int GreaterThan { get; init; } = -1;
 
     }
 }

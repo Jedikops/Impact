@@ -26,7 +26,8 @@ namespace TendersApi.WebApi.Controllers
         public async Task<IActionResult> Get([FromQuery] int page = 1,
             [FromQuery] DateTime? before = null,
             [FromQuery] DateTime? after = null,
-            [FromQuery] OrderBy orderBy = 0)
+            [FromQuery] OrderBy orderBy = OrderBy.NotSet,
+            [FromQuery] OrderByDirection orderByDirection = OrderByDirection.Ascending)
         {
 
             if(!Enum.IsDefined(typeof(OrderBy), orderBy))
@@ -40,7 +41,8 @@ namespace TendersApi.WebApi.Controllers
                     Page = page,
                     Before = before,
                     After = after,
-                    OrderBy = orderBy
+                    OrderBy = orderBy, 
+                    OrderByDirection = orderByDirection
                 });
 
             if (result.IsSuccess)

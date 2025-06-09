@@ -37,12 +37,12 @@ namespace TendersApi.App.Handlers
 
             if (query.OrderBy != OrderBy.NotSet)
             {
-                tenders = query.OrderBy switch
+                tenders = query switch
                 {
-                    OrderBy.DateAscending => tenders.OrderBy(t => t.Date).ToList(),
-                    OrderBy.DateDescending => tenders.OrderByDescending(t => t.Date).ToList(),
-                    OrderBy.ValueAscending => tenders.OrderBy(t => t.Value).ToList(),
-                    OrderBy.ValueDescending => tenders.OrderByDescending(t => t.Value).ToList(),
+                    { OrderBy: OrderBy.Date, OrderByDirection: OrderByDirection.Descending } => tenders.OrderByDescending(t => t.Date).ToList(),
+                    { OrderBy: OrderBy.Date } => tenders.OrderBy(t => t.Date).ToList(),
+                    { OrderBy: OrderBy.Value, OrderByDirection: OrderByDirection.Descending } => tenders.OrderByDescending(t => t.Value).ToList(),
+                    { OrderBy: OrderBy.Value } => tenders.OrderBy(t => t.Value).ToList(),
                     _ => tenders
                 };
             }
@@ -52,12 +52,13 @@ namespace TendersApi.App.Handlers
                 tenders = tenders
                         .Where(x =>
                             (!query.After.HasValue || x.Date >= query.After.Value) &&
-                            (!query.Before.HasValue || x.Date < query.Before.Value))
+                            (!query.Before.HasValue || x.Date < query.Before.Value) &&
+                            (query.GreaterThan >= 0 && x.Value > query.GreaterThan) && 
+                            (query.LessThan >= 0 && x.Value < query.LessThan))
                         .ToList();
             }
 
             var skippedItems = tenders.Skip((query.Page - 1) * query.PageSize).ToList();
-
 
             return Result<PaginatedResult<Tender>>.Success(new PaginatedResult<Tender>()
             {
@@ -69,7 +70,7 @@ namespace TendersApi.App.Handlers
 
         private bool IsFullListRequired(GetTendersQuery query)
         {
-            return query.OrderBy != OrderBy.NotSet || query.After != null || query.Before != null;
+            return query.OrderBy != OrderBy.NotSet || query.After != null || query.Before != null || query.GreaterThan >= 0 || query.LessThan >= 0;
         }
     }
 }
