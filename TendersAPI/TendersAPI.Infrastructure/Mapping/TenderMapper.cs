@@ -7,7 +7,8 @@
             Id = dto.Id,
             Title = dto.Title,
             Date = dto.Date,
-            Description = dto.Description
+            Description = dto.Description, 
+            Value = dto.Value
         };
     }
 }

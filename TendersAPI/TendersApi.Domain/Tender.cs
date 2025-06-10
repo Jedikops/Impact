@@ -12,6 +12,6 @@ namespace TendersApi.Domain
         public DateTime Date { get; init; }
         public string Title { get; init; }
         public string Description { get; init; }
-        public int Value { get; init; }
+        public decimal Value { get; init; }
     }
 }

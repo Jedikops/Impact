@@ -24,6 +24,7 @@ namespace TendersApi.Infrastructure.Models
         public string? Description { get; init; }
 
         [JsonPropertyName("awarded_value_eur")]
-        public required string Value { get; init; }
+        [JsonConverter(typeof(DecimalFromStringConverter))]
+        public required decimal Value { get; init; }
     }
 }

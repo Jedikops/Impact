@@ -26,7 +26,7 @@ namespace TendersApi.App.Handlers
             var tenders = new List<Tender>();
             int repoPage = 1;
 
-            var cacheKey = $"filtered_tenders_cache_key_{query.Page}_{query.After}_{query.Before}_{query.LessThan}_{query.GreaterThan}_{(int)query.OrderBy}_{(int)query.OrderByDirection}";
+            var cacheKey = $"filtered_tenders_cache_key_{query.Page}1_{query.After}2_{query.Before}3_{query.LessThan}4_{query.GreaterThan}5_{(int)query.OrderBy}6_{(int)query.OrderByDirection}7";
 
             var paginatedResult = await _cacheService.GetAsync<PaginatedResult<Tender>>(cacheKey);
 

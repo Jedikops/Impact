@@ -20,8 +20,8 @@ namespace TendersApi.App.Queries
         public OrderBy OrderBy { get; init; }
         public OrderByDirection OrderByDirection { get; init; } = OrderByDirection.Ascending;
 
-        public int LessThan { get; init; }  = -1;
-        public int GreaterThan { get; init; } = -1;
+        public int LessThan { get; init; }
+        public int GreaterThan { get; init; }
 
     }
 }

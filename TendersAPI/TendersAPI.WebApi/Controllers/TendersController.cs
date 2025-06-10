@@ -26,6 +26,8 @@ namespace TendersApi.WebApi.Controllers
         public async Task<IActionResult> Get([FromQuery] int page = 1,
             [FromQuery] DateTime? before = null,
             [FromQuery] DateTime? after = null,
+            [FromQuery] int lessThan = int.MaxValue,
+            [FromQuery] int greaterThan = 0,
             [FromQuery] OrderBy orderBy = OrderBy.NotSet,
             [FromQuery] OrderByDirection orderByDirection = OrderByDirection.Ascending)
         {
@@ -41,6 +43,8 @@ namespace TendersApi.WebApi.Controllers
                     Page = page,
                     Before = before,
                     After = after,
+                    LessThan = lessThan,
+                    GreaterThan = greaterThan,
                     OrderBy = orderBy, 
                     OrderByDirection = orderByDirection
                 });

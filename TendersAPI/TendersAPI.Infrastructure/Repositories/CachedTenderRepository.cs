@@ -44,14 +44,8 @@ namespace TendersApi.Infrastucture.Repositories
 
             if (result.IsSuccess && result.Value is not null)
             {
-                var options = new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-                };
-
                 await _cacheService.SetAsync<PaginatedResult<Tender>>($"{_tenderCacheKey}{page}",
-                    result.Value, options.AbsoluteExpirationRelativeToNow, options.SlidingExpiration);
-
+                    result.Value, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(3));
             }
 
             return result;
