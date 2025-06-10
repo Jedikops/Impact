@@ -44,7 +44,7 @@ The `TendersAPI` project includes a `Dockerfile` in the `TendersAPI/TendersAPI` 
    - Pass required configurations (e.g., database connection strings) via environment variables:
 
      ```powershell
-     docker run -d -p 8080:8080 -e "ConnectionStrings__DefaultConnection=your_connection_string" --name tendersapi tendersapi:latest
+     docker run -d -p 8080:8080 -e "ApiSettings__ConcurrencyLimit=yourlimit" -e "ApiSettings__BaseUrl=tendersapibaseurl" --name tendersapi tendersapi:latest
      ```
 
    - Review `TendersAPI/appsettings.json` for required settings.
