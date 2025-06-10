@@ -10,6 +10,8 @@ using TendersApi.App.Interfaces;
 using TendersApi.Infrastucture.Mapping;
 using TendersApi.Infrastucture.Repositories;
 using TendersApi.Infrastucture.Settings;
+using TendersAPI.App.Interfaces;
+using TendersAPI.Infrastructure.Services;
 using TendersAPI.WebApi.Middlewares;
 
 namespace TendersApi.WebApi
@@ -25,6 +27,7 @@ namespace TendersApi.WebApi
 
             builder.Services.AddTransient<GetTendersQueryHandler>();
             builder.Services.AddTransient<GetTenderByIdQueryHandler>();
+            builder.Services.AddTransient<ICacheService, CacheService>();
 
             // Exception from the rule not to referece infra in WebApi (allowed by clean achritecture)
             builder.Services.AddSingleton<ITenderMapper, TenderMapper>();
@@ -57,9 +60,9 @@ namespace TendersApi.WebApi
             {
                 var settings = sp.GetRequiredService<IOptions<TenderApiSettings>>().Value;
                 var inner = sp.GetRequiredService<TenderRespository>();
-                var cache = sp.GetRequiredService<IDistributedCache>();
+                var cacheService = sp.GetRequiredService<ICacheService>();
 
-                return new CachedTenderRepository(cache, inner, settings.ConcurrencyLimit);
+                return new CachedTenderRepository(cacheService, inner, settings.ConcurrencyLimit);
 
             });
 

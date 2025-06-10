@@ -5,25 +5,27 @@ using System.Threading;
 using TendersApi.App.Common;
 using TendersApi.App.Interfaces;
 using TendersApi.Domain;
+using TendersAPI.App.Interfaces;
 
 namespace TendersApi.Infrastucture.Repositories
 {
     public class CachedTenderRepository : ITenderRepository
     {
-        private readonly String _tenderCacheKey = "tender_cache_key_to_page_";
-        private readonly IDistributedCache _cache;
+        private readonly String _tenderCacheKey = "tender_cache_key_";
+        private readonly ICacheService _cacheService;
         private readonly ITenderRepository _innerRepository;
         private readonly int _maxPage = 100;
         private int _concurrencyLimit;
         private SemaphoreSlim _semaphore;
 
-        public CachedTenderRepository(IDistributedCache cache, ITenderRepository innerRepository, int concurrencyLimit)
+        public CachedTenderRepository(ICacheService cacheService, ITenderRepository innerRepository, int concurrencyLimit)
         {
-            _cache = cache;
+            _cacheService = cacheService;
             _innerRepository = innerRepository;
             _concurrencyLimit = concurrencyLimit;
             _semaphore = new SemaphoreSlim(_concurrencyLimit);
         }
+
         public Task<Tender> GetTenderByIdAsync(int id)
         {
             throw new NotImplementedException();
@@ -31,25 +33,25 @@ namespace TendersApi.Infrastucture.Repositories
 
         public async Task<Result<PaginatedResult<Tender>>> GetAsync(int page)
         {
-            var cached = await _cache.GetStringAsync($"{_tenderCacheKey}{page}");
-
-            if (!string.IsNullOrEmpty(cached))
+            var paginatedResult = await _cacheService.GetAsync<PaginatedResult<Tender>>($"{_tenderCacheKey}{page}");
+            
+            if(paginatedResult is not null)
             {
-                var paginatedResult = JsonSerializer.Deserialize<PaginatedResult<Tender>>(cached)!;
                 return Result<PaginatedResult<Tender>>.Success(paginatedResult);
-
             }
 
             var result = await _innerRepository.GetAsync(page);
 
-            if (result.IsSuccess)
+            if (result.IsSuccess && result.Value is not null)
             {
                 var options = new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
                 };
 
-                await _cache.SetStringAsync($"{_tenderCacheKey}{page}", JsonSerializer.Serialize(result.Value), options);
+                await _cacheService.SetAsync<PaginatedResult<Tender>>($"{_tenderCacheKey}{page}",
+                    result.Value, options.AbsoluteExpirationRelativeToNow, options.SlidingExpiration);
+
             }
 
             return result;

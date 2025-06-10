@@ -5,16 +5,20 @@ using TendersApi.App.Common;
 using TendersApi.App.Interfaces;
 using TendersApi.App.Queries;
 using TendersApi.Domain;
+using TendersAPI.App.Interfaces;
 
 namespace TendersApi.App.Handlers
 {
     public class GetTendersQueryHandler
     {
         private ITenderRepository _repository;
+        private ICacheService _cacheService;
 
-        public GetTendersQueryHandler(ITenderRepository repository)
+        private const string CacheKey = "filtered_tenders_cache_key_";
+        public GetTendersQueryHandler(ITenderRepository repository, ICacheService cacheService)
         {
             _repository = repository;
+            _cacheService = cacheService;
         }
 
         public async Task<Result<PaginatedResult<Tender>>> Handle(GetTendersQuery query)
@@ -22,11 +26,21 @@ namespace TendersApi.App.Handlers
             var tenders = new List<Tender>();
             int repoPage = 1;
 
-            if (!IsFullListRequired(query)) //Since user wants to get a page with filtering and/or ordering we've got to pull everything
+            var cacheKey = $"filtered_tenders_cache_key_{query.Page}_{query.After}_{query.Before}_{query.LessThan}_{query.GreaterThan}_{(int)query.OrderBy}_{(int)query.OrderByDirection}";
+
+            var paginatedResult = await _cacheService.GetAsync<PaginatedResult<Tender>>(cacheKey);
+
+            if (paginatedResult != null)
+            {
+                return Result<PaginatedResult<Tender>>.Success(paginatedResult);
+            }
+
+            if (!IsFullListRequired(query)) 
             {
                 return await _repository.GetAsync(query.Page);
             }
 
+            //Since user wants to get a page with filtering and/or ordering we've got to pull everything
             await foreach (var result in _repository.GetAllAsync())
             {
                 if (!result.IsSuccess || result.Value == null)
@@ -40,12 +54,16 @@ namespace TendersApi.App.Handlers
 
             var skippedItems = tenders.Skip((query.Page - 1) * query.PageSize).ToList();
 
-            return Result<PaginatedResult<Tender>>.Success(new PaginatedResult<Tender>()
+            paginatedResult = new PaginatedResult<Tender>()
             {
                 Items = skippedItems,
                 Page = query.Page,
                 Size = query.PageSize
-            });
+            };
+
+            await _cacheService.SetAsync(cacheKey, paginatedResult, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(3));
+
+            return Result<PaginatedResult<Tender>>.Success(paginatedResult);
         }
 
         private List<Tender> ApplyOrder(GetTendersQuery query, List<Tender> tenders)

@@ -6,6 +6,7 @@ using TendersApi.App.Interfaces;
 using TendersApi.App.Queries;
 using TendersApi.Domain;
 using TendersApi.Tests.Extensions;
+using TendersAPI.App.Interfaces;
 
 namespace TendersApi.Tests
 {
@@ -14,6 +15,7 @@ namespace TendersApi.Tests
     {
         private readonly List<Result<PaginatedResult<Tender>>> _fakePaginatedResult;
         private Mock<ITenderRepository> _mockRepo;
+        private Mock<ICacheService> _mockCache;
         private readonly GetTendersQueryHandler _queryTenderHandler;
         public UnitTests()
         {
@@ -62,8 +64,13 @@ namespace TendersApi.Tests
 
             _mockRepo = new Mock<ITenderRepository>();
             _mockRepo.Setup(repo => repo.GetAllAsync()).Returns(_fakePaginatedResult.Generate(100).GetFakePaginatedResultAsync());
+            
+            _mockCache = new Mock<ICacheService>();
+            _mockCache.Setup(s => s.GetAsync<PaginatedResult<Tender>?>(It.IsAny<string>())).ReturnsAsync(() => null);
+            _mockCache.Setup(s=> s.SetAsync(It.IsAny<string>(), It.IsAny<PaginatedResult<Tender>>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>()))
+                .Returns(Task.CompletedTask);
 
-            _queryTenderHandler = new GetTendersQueryHandler(_mockRepo.Object);
+            _queryTenderHandler = new GetTendersQueryHandler(_mockRepo.Object, _mockCache.Object);
 
         }
 
