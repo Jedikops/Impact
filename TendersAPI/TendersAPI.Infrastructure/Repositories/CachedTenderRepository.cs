@@ -45,7 +45,7 @@ namespace TendersApi.Infrastucture.Repositories
             if (result.IsSuccess && result.Value is not null)
             {
                 await _cacheService.SetAsync<PaginatedResult<Tender>>($"{_tenderCacheKey}{page}",
-                    result.Value, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(3));
+                    result.Value, TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(15));
             }
 
             return result;

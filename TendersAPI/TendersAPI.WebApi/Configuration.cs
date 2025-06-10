@@ -7,6 +7,7 @@ using Polly;
 using Serilog;
 using TendersApi.App.Handlers;
 using TendersApi.App.Interfaces;
+using TendersApi.Domain;
 using TendersApi.Infrastucture.Mapping;
 using TendersApi.Infrastucture.Repositories;
 using TendersApi.Infrastucture.Settings;
@@ -28,6 +29,7 @@ namespace TendersApi.WebApi
             builder.Services.AddTransient<GetTendersQueryHandler>();
             builder.Services.AddTransient<GetTenderByIdQueryHandler>();
             builder.Services.AddTransient<ICacheService, CacheService>();
+            builder.Services.AddTransient<ITenderQueryProcessor, TenderQueryProcessor>();
 
             // Exception from the rule not to referece infra in WebApi (allowed by clean achritecture)
             builder.Services.AddSingleton<ITenderMapper, TenderMapper>();

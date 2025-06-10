@@ -15,13 +15,13 @@ namespace TendersApi.App.Queries
         public DateTime? Before { get; init; }
         public DateTime? After { get; init; }
 
+        public int LessThan { get; init; }
+        public int GreaterThan { get; init; }
+
         public int PageSize { get; private init; } = 100;
 
         public OrderBy OrderBy { get; init; }
         public OrderByDirection OrderByDirection { get; init; } = OrderByDirection.Ascending;
-
-        public int LessThan { get; init; }
-        public int GreaterThan { get; init; }
 
     }
 }

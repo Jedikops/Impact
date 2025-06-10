@@ -13,12 +13,13 @@ namespace TendersApi.App.Handlers
     {
         private ITenderRepository _repository;
         private ICacheService _cacheService;
-
+        private readonly ITenderQueryProcessor _tenderQueryProcessor;
         private const string CacheKey = "filtered_tenders_cache_key_";
-        public GetTendersQueryHandler(ITenderRepository repository, ICacheService cacheService)
+        public GetTendersQueryHandler(ITenderRepository repository, ICacheService cacheService, ITenderQueryProcessor tenderQueryProcessor)
         {
             _repository = repository;
             _cacheService = cacheService;
+            _tenderQueryProcessor = tenderQueryProcessor;
         }
 
         public async Task<Result<PaginatedResult<Tender>>> Handle(GetTendersQuery query)
@@ -46,11 +47,12 @@ namespace TendersApi.App.Handlers
                 if (!result.IsSuccess || result.Value == null)
                     return Result<PaginatedResult<Tender>>.Failure(ResultStatus.ExternalApiError, "missing chunks of data");
 
-                tenders.AddRange(result.Value.Items);
+                var filteredTenders = _tenderQueryProcessor.Filter(result.Value.Items, query.After, query.Before, query.GreaterThan, query.LessThan);
+
+                tenders.AddRange(filteredTenders);
             }
 
-            tenders = ApplyFilters(query, tenders);
-            tenders = ApplyOrder(query, tenders);
+            tenders = _tenderQueryProcessor.Order(tenders, query.OrderBy, query.OrderByDirection).ToList();
 
             var skippedItems = tenders.Skip((query.Page - 1) * query.PageSize).ToList();
 
@@ -66,42 +68,11 @@ namespace TendersApi.App.Handlers
             return Result<PaginatedResult<Tender>>.Success(paginatedResult);
         }
 
-        private List<Tender> ApplyOrder(GetTendersQuery query, List<Tender> tenders)
-        {
-            if (query.OrderBy != OrderBy.NotSet)
-            {
-                tenders = query switch
-                {
-                    { OrderBy: OrderBy.Date, OrderByDirection: OrderByDirection.Descending } => tenders.OrderByDescending(t => t.Date).ToList(),
-                    { OrderBy: OrderBy.Date } => tenders.OrderBy(t => t.Date).ToList(),
-                    { OrderBy: OrderBy.Value, OrderByDirection: OrderByDirection.Descending } => tenders.OrderByDescending(t => t.Value).ToList(),
-                    { OrderBy: OrderBy.Value } => tenders.OrderBy(t => t.Value).ToList(),
-                    _ => tenders
-                };
-            }
 
-            return tenders;
-        }
-
-        private List<Tender> ApplyFilters(GetTendersQuery query, List<Tender> tenders)
-        {
-            if (query.After != null || query.Before != null)
-            {
-                tenders = tenders
-                        .Where(x =>
-                            (!query.After.HasValue || x.Date >= query.After.Value) &&
-                            (!query.Before.HasValue || x.Date < query.Before.Value) &&
-                            (query.GreaterThan >= 0 && x.Value > query.GreaterThan) &&
-                            (query.LessThan >= 0 && x.Value < query.LessThan))
-                        .ToList();
-            }
-
-            return tenders;
-        }
 
         private bool IsFullListRequired(GetTendersQuery query)
         {
-            return query.OrderBy != OrderBy.NotSet || query.After != null || query.Before != null || query.GreaterThan >= 0 || query.LessThan >= 0;
+            return query.OrderBy != OrderBy.NotSet || query.After != null || query.Before != null || query.GreaterThan > 0 || query.LessThan < int.MaxValue;
         }
     }
 }
