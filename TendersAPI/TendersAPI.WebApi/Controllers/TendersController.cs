@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection.Metadata.Ecma335;
 using TendersApi.App.Common;
 using TendersApi.App.Handlers;
 using TendersApi.App.Queries;
@@ -15,11 +17,13 @@ namespace TendersApi.WebApi.Controllers
     {
         private readonly GetTendersQueryHandler _getTendersHandler;
         private readonly GetTenderByIdQueryHandler _getTenderByIdHandler;
+        private readonly GetTendersBySupplierIdQueryHandler _getTendersBySupplierIdQueryHandler;
 
-        public TendersController(GetTendersQueryHandler getTendersHandler, GetTenderByIdQueryHandler getTenderByIdHandler)
+        public TendersController(GetTendersQueryHandler getTendersHandler, GetTenderByIdQueryHandler getTenderByIdHandler, GetTendersBySupplierIdQueryHandler getTendersBySupplierIdQueryHandler)
         {
             _getTendersHandler = getTendersHandler;
             _getTenderByIdHandler = getTenderByIdHandler;
+            _getTendersBySupplierIdQueryHandler = getTendersBySupplierIdQueryHandler;
         }
 
         [HttpGet]
@@ -31,12 +35,6 @@ namespace TendersApi.WebApi.Controllers
             [FromQuery] OrderBy orderBy = OrderBy.NotSet,
             [FromQuery] OrderByDirection orderByDirection = OrderByDirection.Ascending)
         {
-
-            if(!Enum.IsDefined(typeof(OrderBy), orderBy))
-            {
-                return BadRequest();
-            }
-
             var result = await _getTendersHandler.Handle(
                 new GetTendersQuery
                 {
@@ -45,13 +43,34 @@ namespace TendersApi.WebApi.Controllers
                     After = after,
                     LessThan = lessThan,
                     GreaterThan = greaterThan,
-                    OrderBy = orderBy, 
+                    OrderBy = orderBy,
                     OrderByDirection = orderByDirection
                 });
 
+            return HandleResult(result);
+        }
+
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var result = await _getTenderByIdHandler.Handle(new GetTenderByIdQuery { Id = id });
+
+            return HandleResult(result);
+        }
+
+        [HttpGet("supplier/{id}")]
+        public async Task<IActionResult> GetBySupplierId(int id)
+        {
+            var result = await _getTendersBySupplierIdQueryHandler.Handle(new GetTendersBySupplierIdQuery { Id = id });
+
+            return HandleResult(result);
+        }
+
+        private IActionResult HandleResult<T>(Result<T> result)
+        {
             if (result.IsSuccess)
                 return Ok(result);
-
             return result.Status switch
             {
                 ResultStatus.ValidationError => BadRequest(result),
@@ -60,15 +79,5 @@ namespace TendersApi.WebApi.Controllers
                 _ => StatusCode(500, result),
             };
         }
-
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var tender = await _getTenderByIdHandler.Handle(new GetTenderByIdQuery { Id = id });
-            if (tender == null) return NotFound();
-            return Ok(tender);
-        }
-
     }
 }

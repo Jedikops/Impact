@@ -28,6 +28,8 @@ namespace TendersApi.WebApi
 
             builder.Services.AddTransient<GetTendersQueryHandler>();
             builder.Services.AddTransient<GetTenderByIdQueryHandler>();
+            builder.Services.AddTransient<GetTendersBySupplierIdQueryHandler>();
+
             builder.Services.AddTransient<ICacheService, CacheService>();
             builder.Services.AddTransient<ITenderQueryProcessor, TenderQueryProcessor>();
 

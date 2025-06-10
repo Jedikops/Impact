@@ -21,7 +21,8 @@ namespace TendersApi.App.Handlers
 
         public async Task<Result<Tender>> Handle(GetTenderByIdQuery query)
         {
-            return await _repository.GetTenderByIdAsync(query.Id);
+            //can add caching here if needed
+            return await _repository.GetByIdAsync(query.Id);
 
         }
     }

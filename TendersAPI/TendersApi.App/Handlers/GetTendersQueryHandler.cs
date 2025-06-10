@@ -25,7 +25,6 @@ namespace TendersApi.App.Handlers
         public async Task<Result<PaginatedResult<Tender>>> Handle(GetTendersQuery query)
         {
             var tenders = new List<Tender>();
-            int repoPage = 1;
 
             var cacheKey = $"filtered_tenders_cache_key_{query.Page}1_{query.After}2_{query.Before}3_{query.LessThan}4_{query.GreaterThan}5_{(int)query.OrderBy}6_{(int)query.OrderByDirection}7";
 

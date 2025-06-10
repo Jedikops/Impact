@@ -11,6 +11,7 @@ namespace TendersApi.Infrastucture.Repositories
 {
     public class CachedTenderRepository : ITenderRepository
     {
+        private readonly String _tendersBySupplierIdCacheKey = "tender_by_supplier_id_cache_key_";
         private readonly String _tenderCacheKey = "tender_cache_key_";
         private readonly String _tendersCacheKey = "tenders_cache_key_";
         private readonly ICacheService _cacheService;
@@ -26,8 +27,9 @@ namespace TendersApi.Infrastucture.Repositories
             _concurrencyLimit = concurrencyLimit;
             _semaphore = new SemaphoreSlim(_concurrencyLimit);
         }
+        
 
-        public async Task<Result<Tender>> GetTenderByIdAsync(int id)
+        public async Task<Result<Tender>> GetByIdAsync(int id)
         {
             var tender = await _cacheService.GetAsync<Tender>($"{_tenderCacheKey}{id}");
 

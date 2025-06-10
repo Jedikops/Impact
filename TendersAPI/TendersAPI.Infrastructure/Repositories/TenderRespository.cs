@@ -105,7 +105,7 @@ namespace TendersApi.Infrastucture.Repositories
             }
         }
 
-        Task<Result<Domain.Tender>> ITenderRepository.GetTenderByIdAsync(int id)
+        Task<Result<Domain.Tender>> ITenderRepository.GetByIdAsync(int id)
         {
             throw new NotImplementedException();
         }

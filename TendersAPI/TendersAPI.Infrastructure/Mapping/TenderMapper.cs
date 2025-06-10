@@ -7,8 +7,9 @@
             Id = dto.Id,
             Title = dto.Title,
             Date = dto.Date,
-            Description = dto.Description, 
-            Value = dto.Value
+            Description = dto.Description!, 
+            Value = dto.Value,
+            SupplierIds = dto.AwardedData?.Select(x => x.SupplierId) ?? new List<int>()
         };
     }
 }
