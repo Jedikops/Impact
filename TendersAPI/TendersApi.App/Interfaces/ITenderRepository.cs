@@ -9,7 +9,7 @@ namespace TendersApi.App.Interfaces
 
         IAsyncEnumerable<Result<PaginatedResult<Domain.Tender>>> GetAllAsync();
 
-        Task<Tender> GetTenderByIdAsync(int id);
+        Task<Result<Tender>> GetTenderByIdAsync(int id);
 
     }
 }

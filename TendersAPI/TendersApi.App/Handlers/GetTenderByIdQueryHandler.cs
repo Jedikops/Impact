@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TendersApi.App.Common;
 using TendersApi.App.Interfaces;
 using TendersApi.App.Queries;
 using TendersApi.Domain;
@@ -18,7 +19,7 @@ namespace TendersApi.App.Handlers
             _repository = repository;
         }
 
-        public async Task<Tender?> Handle(GetTenderByIdQuery query)
+        public async Task<Result<Tender>> Handle(GetTenderByIdQuery query)
         {
             return await _repository.GetTenderByIdAsync(query.Id);
 

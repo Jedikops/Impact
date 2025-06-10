@@ -27,10 +27,6 @@ namespace TendersApi.Infrastucture.Repositories
             _logger = logger;
         }
 
-        public Task<TendersApi.Domain.Tender> GetTenderByIdAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
 
         public async Task<Result<PaginatedResult<Domain.Tender>>> GetAsync(int page)
         {
@@ -107,6 +103,16 @@ namespace TendersApi.Infrastucture.Repositories
             {
                 yield return await remainingTask;
             }
+        }
+
+        Task<Result<Domain.Tender>> ITenderRepository.GetTenderByIdAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<TendersApi.Domain.Tender> GetTenderByIdAsync(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

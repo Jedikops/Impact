@@ -34,3 +34,11 @@ GET {{TendersAPI.Service_HostAddress}}/api/tenders?page=55
 Accept: application/json
 
 ###
+    
+GET {{TendersAPI.Service_HostAddress}}/api/tenders/564108
+Accept: application/json
+
+###
+
+GET {{TendersAPI.Service_HostAddress}}/api/tenders/561616
+Accept: application/json
