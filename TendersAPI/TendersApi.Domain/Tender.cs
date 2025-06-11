@@ -11,6 +11,6 @@ namespace TendersApi.Domain
         public decimal Value { get; init; }
 
         [JsonIgnore]
-        public required IEnumerable<int> SupplierIds { get; init; }
+        public IEnumerable<int>? SupplierIds { get; set; }
     }
 }
