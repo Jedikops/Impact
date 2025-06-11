@@ -28,6 +28,6 @@ namespace TendersApi.Infrastructure.Models
         public required decimal Value { get; init; }
 
         [JsonPropertyName("awarded")]
-        public List<Awarded>? AwardedData { get; init; }
+        public List<Awarded>? AwardedData { get; init; } 
     }
 }

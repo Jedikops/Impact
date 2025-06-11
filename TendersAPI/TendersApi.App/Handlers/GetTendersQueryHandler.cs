@@ -46,7 +46,7 @@ namespace TendersApi.App.Handlers
                 if (!result.IsSuccess || result.Value == null)
                     return Result<PaginatedResult<Tender>>.Failure(ResultStatus.ExternalApiError, "missing chunks of data");
 
-                var filteredTenders = _tenderQueryProcessor.Filter(result.Value.Items, query.After, query.Before, query.GreaterThan, query.LessThan);
+                var filteredTenders = _tenderQueryProcessor.Filter(result.Value.Items, query.Before, query.After, query.LessThan, query.GreaterThan);
 
                 tenders.AddRange(filteredTenders);
             }
@@ -59,7 +59,7 @@ namespace TendersApi.App.Handlers
             {
                 Items = skippedItems,
                 Page = query.Page,
-                Size = query.PageSize
+                Size = skippedItems.Count
             };
 
             await _cacheService.SetAsync(cacheKey, paginatedResult, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(3));

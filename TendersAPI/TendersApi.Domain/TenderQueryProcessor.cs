@@ -13,12 +13,12 @@ namespace TendersApi.Domain
         {
             if (after != null || before != null || lessThan < int.MaxValue || greaterThan > 0)
             {
-                return tenders
+                tenders = tenders
                  .Where(x =>
                      (!after.HasValue || x.Date > after.Value) &&
                      (!before.HasValue || x.Date < before.Value) &&
-                     (greaterThan >= 0 && x.Value > greaterThan) &&
-                     (lessThan >= 0 && x.Value < lessThan))
+                     (!(lessThan < int.MaxValue) || x.Value > lessThan) &&
+                     (!(greaterThan > 0) || x.Value < lessThan))
                  .ToList();
             }
 
