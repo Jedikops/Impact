@@ -1,4 +1,6 @@
-﻿namespace TendersApi.Infrastucture.Mapping
+﻿using TendersApi.Infrastructure.Models;
+
+namespace TendersApi.Infrastucture.Mapping
 {
     public class TenderMapper : ITenderMapper
     {
@@ -9,7 +11,7 @@
             Date = dto.Date,
             Description = dto.Description!, 
             Value = dto.Value,
-            SupplierIds = dto.AwardedData?.SelectMany(x => x.SupplierIds).ToList()!
+            Suppliers = dto.AwardedData?.SelectMany(a => a.Suppliers ).Select(x => new Domain.Supplier(x.Id, x.Name)).ToList()!
         };
     }
 }

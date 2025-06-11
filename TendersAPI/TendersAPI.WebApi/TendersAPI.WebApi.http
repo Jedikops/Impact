@@ -5,15 +5,30 @@ Accept: application/json
 
 ###
 
-GET {{TendersAPI.Service_HostAddress}}/api/tenders?before=2022-06-06T00:00:00&after=2021-03-06T00:00:00&orderby=13
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?before=2022-06-06T00:00:00&after=2022-03-06T00:00:00&orderby=1
+
+###
+
+
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?before=2022-06-06T00:00:00&after=2022-03-06T00:00:00&orderby=1&orderByDirection=0
 Accept: application/json
 
 ###
 
 
-GET {{TendersAPI.Service_HostAddress}}/api/tenders?before=2022-06-06T00:00:00&after=2022-03-06T00:00:00
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?before=2022-06-06T00:00:00&after=2022-03-06T00:00:00&orderby=1&orderByDirection=1
 Accept: application/json
 
+###
+
+
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?before=2022-06-06T00:00:00&after=2022-03-06T00:00:00&orderby=2&orderByDirection=0
+Accept: application/json
+
+###
+
+
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?before=2022-06-06T00:00:00&after=2022-03-06T00:00:00&orderby=2&orderByDirection=1
 ###
 
 GET {{TendersAPI.Service_HostAddress}}/api/tenders?page=10
@@ -32,6 +47,16 @@ Accept: application/json
 
 GET {{TendersAPI.Service_HostAddress}}/api/tenders?page=55
 Accept: application/json
+
+
+###
+
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?page=1&orderby=1&orderByDirection=0
+
+
+###
+
+GET {{TendersAPI.Service_HostAddress}}/api/tenders?page=100&orderby=1&orderByDirection=1
 
 ###
     

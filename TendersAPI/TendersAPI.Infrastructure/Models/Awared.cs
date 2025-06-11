@@ -6,8 +6,8 @@ namespace TendersApi.Infrastructure.Models
 {
     public class Awarded
     {
-        [JsonPropertyName("suppliers_id")]
-        [JsonConverter(typeof(IntCollectionFromStringConverter))]
-        public required IEnumerable<int> SupplierIds { get; set; }
+        [JsonPropertyName("suppliers")]
+        public List<Supplier> Suppliers { get; set; }
+
     }
 }

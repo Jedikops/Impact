@@ -53,7 +53,7 @@ namespace TendersApi.App.Handlers
 
             tenders = _tenderQueryProcessor.Order(tenders, query.OrderBy, query.OrderByDirection).ToList();
 
-            var skippedItems = tenders.Skip((query.Page - 1) * query.PageSize).ToList();
+            var skippedItems = tenders.Skip((query.Page - 1) * query.PageSize).Take(query.PageSize).ToList();
 
             paginatedResult = new PaginatedResult<Tender>()
             {

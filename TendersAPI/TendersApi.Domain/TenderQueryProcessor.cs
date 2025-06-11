@@ -27,7 +27,7 @@ namespace TendersApi.Domain
 
         public IEnumerable<Tender> FilterBySupplierId(IEnumerable<Tender> items, int id)
         {
-            return items.Where(t => t.SupplierIds.Any(x => x == id)).ToList();
+            return items.Where(t => t.Suppliers.Any(x => x.Id == id)).ToList();
         }
 
         public IEnumerable<Tender> Order(IEnumerable<Tender> tenders, OrderBy orderBy, OrderByDirection orderByDirection)
