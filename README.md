@@ -93,13 +93,12 @@ The `TendersAPI.AppHost` project in `TendersAPI/TendersAPI.AppHost` uses .NET As
    - The API is typically available at `http://localhost:8080` or `https://localhost:8081` (verify in `TendersAPI.AppHost/Program.cs`).
 
 5. **Configuration**:
-   - Update `TendersAPI/appsettings.json` or environment variables for required settings, e.g., database connection:
+   - Update `TendersAPI/.AppHost/program.cs` or environment variables for required settings, e.g., database connection:
 
-     ```json
-     "ApiSettings": {
-      "BaseUrl": "https://tenders.guru/api/pl/tenders",
-      "ConcurrencyLimit":  10
-      }
+     ```c#
+        builder.AddProject<Projects.TendersAPI_WebApi>("tendersapi-service")
+          .WithEnvironment("ApiSettings__ConcurrencyLimit", "20")
+          .WithEnvironment("ApiSettings__BaseUrl", "https://tendersapi.example.com/api/tenders");
      ```
 
    - Check `TendersAPI.AppHost/Program.cs` for additional services (e.g., Redis, SQL Server) and their configurations.
