@@ -9,7 +9,7 @@
             Date = dto.Date,
             Description = dto.Description!, 
             Value = dto.Value,
-            SupplierIds = dto.AwardedData?.Select(x => x.SupplierId) ?? new List<int>()
+            SupplierIds = dto.AwardedData?.SelectMany(x => x.SupplierIds) ?? Enumerable.Empty<int>()
         };
     }
 }
